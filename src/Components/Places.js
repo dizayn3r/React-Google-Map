@@ -10,6 +10,7 @@ import {
   ComboboxOption,
 } from "@reach/combobox";
 import "@reach/combobox/styles.css";
+import "../App.css";
 
 function Places({ setOffice }) {
   const {
@@ -20,15 +21,13 @@ function Places({ setOffice }) {
     clearSuggestions,
   } = usePlacesAutocomplete();
 
-  console.log(status)
-
   const handleSelect = async (val) => {
     setValue(val, false);
     clearSuggestions();
 
     const results = await getGeocode({ address: val });
     const { lat, lng } = await getLatLng(results[0]);
-    setOffice({ lat, lng });
+    setOffice({ lat: lat, lng: lng });
   };
 
   return (
@@ -44,7 +43,7 @@ function Places({ setOffice }) {
         <ComboboxList>
           {status === "OK" &&
             data.map(({ place_id, description }) => (
-              <ComboboxOption key={place_id} description={description} />
+              <ComboboxOption key={place_id} value={description} />
             ))}
         </ComboboxList>
       </ComboboxPopover>
