@@ -1,13 +1,14 @@
 import "./App.css";
-import Map from "./Map";
+import Map from "./Pages/Map";
+import {useLoadScript} from "@react-google-maps/api";
 
 function App() {
-  return (
-    <div className="App">
-      <div className="sidebar">Controls</div>
-      <Map />
-    </div>
-  );
+  const {isLoaded} = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_API_KEY,
+  })
+
+  if (!isLoaded) return <div>Loading...</div>
+      return <Map />;
 }
 
 export default App;

@@ -1,29 +1,14 @@
 import {
   GoogleMap,
-  MarkerClustererF,
-  MarkerF,
-  useLoadScript,
+  MarkerClusterer,
+  Marker,
 } from "@react-google-maps/api";
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import "./App.css";
-import { fleetLocations, vehicleLocations } from "./data.js";
+import { fleetLocations } from "../data.js";
 
-const google = window.google;
-
-function Map() {
+function VehicleMarkerCluster() {
   const [bounds, setBounds] = useState(null);
-
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_API_KEY,
-  });
-
-  const options = useMemo(
-    () => ({
-      disableDefaultUI: false,
-      clickableIcons: true,
-    }),
-    []
-  );
 
   const map = useRef(null);
 
@@ -52,51 +37,7 @@ function Map() {
     }
   }, [fleetLocations, map]);
 
-  const max_min_coordinates = {
-    max_lat: -90,
-    min_lat: 90,
-    max_lng: -180,
-    min_lng: 180,
-  };
-
-  const buildPolyLine = () => {
-    const polylineCoordinates = [];
-    let last_element = null;
-    vehicleLocations.forEach((element) => {
-      if (!last_element) {
-        last_element = element;
-        return;
-      }
-      if (element["time"] - last_element["time"] > 0.25 * 60) {
-        if (element["latitude"] > max_min_coordinates.max_lat) {
-          max_min_coordinates.max_lat = element["latitude"];
-        }
-        if (element["latitude"] < max_min_coordinates.min_lat) {
-          max_min_coordinates.min_lat = element["latitude"];
-        }
-        if (element["longitude"] > max_min_coordinates.max_lng) {
-          max_min_coordinates.max_lng = element["longitude"];
-        }
-        if (element["longitude"] < max_min_coordinates.min_lng) {
-          max_min_coordinates.min_lng = element["longitude"];
-        }
-        polylineCoordinates.push([
-          { lat: last_element.latitude, lng: last_element.longitude },
-          {
-            lat: element.latitude,
-            lng: element.longitude,
-          },
-        ]);
-        last_element = element;
-      }
-    });
-
-    return polylineCoordinates;
-  };
-
-  return !isLoaded ? (
-    <h1>Loading...</h1>
-  ) : (
+  return (
     <GoogleMap
       ref={map}
       mapContainerClassName="map-container"
@@ -104,8 +45,8 @@ function Map() {
       zoom={10}
     >
       {fleetLocations && (
-        <MarkerClustererF
-          minimumClusterSize={10}
+        <MarkerClusterer
+          minimumClusterSize={5}
           styles={[
             {
               url: "img/blue-circle.svg",
@@ -122,7 +63,7 @@ function Map() {
               .map((location) => {
                 return (
                   location.mac !== "ALONHALON" && (
-                    <MarkerF
+                    <Marker
                       clusterer={cluster}
                       position={{
                         lat: location.last_location.latitude,
@@ -133,15 +74,15 @@ function Map() {
                       }}
                     >
                       {location.mac}
-                    </MarkerF>
+                    </Marker>
                   )
                 );
               })
           }
-        </MarkerClustererF>
+        </MarkerClusterer>
       )}
     </GoogleMap>
   );
 }
 
-export default Map;
+export default VehicleMarkerCluster;
